@@ -8,10 +8,10 @@ import (
 	"go.uber.org/zap"
 )
 
-var orders = map[uint64]Order{
-	1: Order{OrderID: 1, ProductName: "phone"},
-	2: Order{OrderID: 2, ProductName: "car"},
-	3: Order{OrderID: 3, ProductName: "food"},
+var orders []Order = []Order{
+	{OrderID: 1, ProductName: "phone"},
+	{OrderID: 2, ProductName: "car"},
+	{OrderID: 3, ProductName: "food"},
 }
 
 type OrderHandler struct {
@@ -29,7 +29,7 @@ func newOrderHandler() *OrderHandler {
 func RegisterOrderRouter(r *gin.Engine) {
 	h := newOrderHandler()
 	g := r.Group("/order")
-	g.GET("/add", h.List)
+	g.GET("/list", h.List)
 }
 
 func (h *OrderHandler) List(c *gin.Context) {
