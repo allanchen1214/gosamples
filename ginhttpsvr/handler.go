@@ -16,12 +16,12 @@ var orders []Order = []Order{
 	{OrderID: 3, ProductName: "food"},
 }
 
-type OrderHandler struct {
-}
-
 type Order struct {
 	OrderID     uint64 `json:"orderID"`
 	ProductName string `json:"productName"`
+}
+
+type OrderHandler struct {
 }
 
 func newOrderHandler() *OrderHandler {
@@ -33,6 +33,7 @@ func RegisterOrderRouter(r *gin.Engine) {
 	g := r.Group("/order")
 	g.GET("/list", h.List)
 	g.GET("/item/:id", h.GetByID)
+	g.GET("/item", h.GetByQueryID)
 }
 
 func (h *OrderHandler) List(c *gin.Context) {
@@ -45,13 +46,36 @@ func (h *OrderHandler) GetByID(c *gin.Context) {
 	id, _ := strconv.Atoi(sid)
 	id64 := uint64(id)
 	log.Info("get by id req", zap.Uint64("id", id64))
+	item, err := getOrderByID(id64)
+	if err != nil {
+		log.Error("get by id resp", zap.Error(err))
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	log.Info("get by id resp", zap.Any("data", item))
+	c.JSON(http.StatusOK, item)
+}
+
+func (h *OrderHandler) GetByQueryID(c *gin.Context) {
+	sid := c.DefaultQuery("id", "0")
+	id, _ := strconv.Atoi(sid)
+	id64 := uint64(id)
+	log.Info("get by query id req", zap.Uint64("id", id64))
+	item, err := getOrderByID(id64)
+	if err != nil {
+		log.Error("get by query id resp", zap.Error(err))
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+	log.Info("get by query id resp", zap.Any("data", item))
+	c.JSON(http.StatusOK, item)
+}
+
+func getOrderByID(id uint64) (*Order, error) {
 	for _, item := range orders {
-		if item.OrderID == id64 {
-			log.Info("get by id resp", zap.Any("data", item))
-			c.JSON(http.StatusOK, item)
-			return
+		if item.OrderID == id {
+			return &item, nil
 		}
 	}
-	log.Info("get by id resp", zap.Error(errors.New("NotFound")))
-	c.JSON(http.StatusBadRequest, "NotFound")
+	return nil, errors.New("NotFound")
 }
