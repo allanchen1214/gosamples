@@ -20,7 +20,7 @@ type OrderHandler struct {
 }
 
 type Order struct {
-	OrderID     uint64 `json:"orderid"`
+	OrderID     uint64 `json:"orderID"`
 	ProductName string `json:"productName"`
 }
 
@@ -32,7 +32,7 @@ func RegisterOrderRouter(r *gin.Engine) {
 	h := newOrderHandler()
 	g := r.Group("/order")
 	g.GET("/list", h.List)
-	g.GET("/get/:id", h.GetByID)
+	g.GET("/item/:id", h.GetByID)
 }
 
 func (h *OrderHandler) List(c *gin.Context) {
