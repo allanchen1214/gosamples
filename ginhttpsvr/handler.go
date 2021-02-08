@@ -34,6 +34,7 @@ func RegisterOrderRouter(r *gin.Engine) {
 	g.GET("/list", h.List)
 	g.GET("/item/:id", h.GetByID)
 	g.GET("/item", h.GetByQueryID)
+	g.POST("/add", h.Add)
 }
 
 func (h *OrderHandler) List(c *gin.Context) {
@@ -78,4 +79,16 @@ func getOrderByID(id uint64) (*Order, error) {
 		}
 	}
 	return nil, errors.New("NotFound")
+}
+
+func (h *OrderHandler) Add(c *gin.Context) {
+	var order Order
+	if err := c.ShouldBindJSON(&order); err != nil {
+		log.Error("bind json", zap.Error(err))
+		c.JSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	orders = append(orders, order)
+	c.JSON(http.StatusOK, order)
 }
